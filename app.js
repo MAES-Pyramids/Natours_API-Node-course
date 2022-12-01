@@ -8,7 +8,7 @@ const tours = JSON.parse(
 
 const app = express();
 
-app.use(express.json()); //middle ware to translate data in the request body
+app.use(express.json()); //middleware to translate data in the request body
 //---------------------------------------------------------------------------
 // app.get('/', (req, res) => {
 //   // res.status(200).send(`Hello from the server side , it"s nice to meat you!"`);   //send used to send string
@@ -32,6 +32,21 @@ app.get('/api/v1/tours', (req, res) => {
   });
 });
 
+app.get('/api/v1/tours/:id', (req, res) => {
+  const id = parseInt(req.params.id);
+  const tour = tours.find((Element) => Element.id === id);
+  if (!tour) {
+    res.status(404).json({
+      status: 'failure',
+      message: 'Invalid ID',
+    });
+  }
+  res.status(200).json({
+    status: 'success',
+    tour: { tour: tour },
+  });
+});
+
 app.post('/api/v1/tours', (req, res) => {
   // console.log(req.body); //body is the property name of the body in the request
   const newId = tours.at(-1).id + 1;
@@ -49,6 +64,36 @@ app.post('/api/v1/tours', (req, res) => {
       });
     }
   );
+});
+
+app.patch('/api/v1/tours/:id', (req, res) => {
+  const id = parseInt(req.params.id);
+  const tour = tours.find((Element) => Element.id === id);
+  if (!tour) {
+    res.status(404).json({
+      status: 'failure',
+      message: 'Invalid ID',
+    });
+  }
+  res.status(200).json({
+    status: 'success',
+    tour: `Updated tour`,
+  });
+});
+
+app.delete('/api/v1/tours/:id', (req, res) => {
+  const id = parseInt(req.params.id);
+  const tour = tours.find((Element) => Element.id === id);
+  if (!tour) {
+    res.status(404).json({
+      status: 'failure',
+      message: 'Invalid ID',
+    });
+  }
+  res.status(204).json({
+    status: 'success',
+    tour: null,
+  });
 });
 
 const port = 3000;
