@@ -1,19 +1,3 @@
-const express = require('express');
-const { json } = require('express/lib/response');
-const fs = require('fs');
-
-const tours = JSON.parse(
-  fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
-);
-
-const app = express();
-
-app.use(express.json()); //middleware to translate data in the request body
-
-app.use((req, res, next) => {
-  req.requestTime = new Date().toISOString();
-  next();
-});
 //---------------------------------------------------------------------------
 // app.get('/', (req, res) => {
 //   // res.status(200).send(`Hello from the server side , it"s nice to meat you!"`);   //send used to send string
@@ -26,7 +10,39 @@ app.use((req, res, next) => {
 // app.post('/', (req, res) => {
 //   res.status(401).send('Sorry, you are not allowed to post at the moment');
 // });
+
+// app.get('/api/v1/tours', getAllTours);
+// app.get('/api/v1/tours/:id', getSpecificTour);
+// app.post('/api/v1/tours', postNewTour);
+// app.patch('/api/v1/tours/:id', patchSpecificTour);
+// app.delete('/api/v1/tours/:id', deleteSpecificTour);
 //---------------------------------------------------------------------------
+const { json } = require('express/lib/response');
+const express = require('express');
+const morgan = require('morgan');
+const fs = require('fs');
+//---------------------------------------------------------------------------
+
+const tours = JSON.parse(
+  fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
+);
+let requestNumber = 0;
+//---------------------------------------------------------------------------
+const app = express();
+
+app.use(morgan('dev'));
+app.use(express.json()); //middleware to translate data in the request body
+app.use((req, res, next) => {
+  req.requestTime = new Date().toISOString();
+  next();
+});
+app.use((req, res, next) => {
+  requestNumber++;
+  console.log(`We have ${requestNumber} until ${req.requestTime}`);
+  next();
+});
+//---------------------------------------------------------------------------
+
 const getAllTours = (req, res) => {
   res.status(200).json({
     status: 'success',
@@ -47,12 +63,13 @@ const getSpecificTour = (req, res) => {
       requestTime: req.requestTime,
       message: 'Invalid ID',
     });
+  } else {
+    res.status(200).json({
+      status: 'success',
+      requestTime: req.requestTime,
+      tour: { tour: tour },
+    });
   }
-  res.status(200).json({
-    status: 'success',
-    requestTime: req.requestTime,
-    tour: { tour: tour },
-  });
 };
 
 const postNewTour = (req, res) => {
@@ -82,11 +99,12 @@ const patchSpecificTour = (req, res) => {
       status: 'failure',
       message: 'Invalid ID',
     });
+  } else {
+    res.status(200).json({
+      status: 'success',
+      tour: `Updated tour`,
+    });
   }
-  res.status(200).json({
-    status: 'success',
-    tour: `Updated tour`,
-  });
 };
 
 const deleteSpecificTour = (req, res) => {
@@ -97,18 +115,13 @@ const deleteSpecificTour = (req, res) => {
       status: 'failure',
       message: 'Invalid ID',
     });
+  } else {
+    res.status(204).json({
+      status: 'success',
+      tour: null,
+    });
   }
-  res.status(204).json({
-    status: 'success',
-    tour: null,
-  });
 };
-
-// app.get('/api/v1/tours', getAllTours);
-// app.get('/api/v1/tours/:id', getSpecificTour);
-// app.post('/api/v1/tours', postNewTour);
-// app.patch('/api/v1/tours/:id', patchSpecificTour);
-// app.delete('/api/v1/tours/:id', deleteSpecificTour);
 
 app.route('/api/v1/tours').get(getAllTours).post(postNewTour);
 
@@ -117,7 +130,33 @@ app
   .get(getSpecificTour)
   .patch(patchSpecificTour)
   .delete(deleteSpecificTour);
+//---------------------------------------------------------------------------
+const getAllUsers = (req, res) => {
+  res.status(500).send('User routing is not supported yet.');
+};
+const addNewUser = (req, res) => {
+  res.status(500).send('User routing is not supported yet.');
+};
 
+const getSpecificUser = (req, res) => {
+  res.status(500).send('User routing is not supported yet.');
+};
+
+const patchSpecificUser = (req, res) => {
+  res.status(500).send('User routing is not supported yet.');
+};
+
+const deleteSpecificUser = (req, res) => {
+  res.status(500).send('User routing is not supported yet.');
+};
+app.route('/api/v1/users').get(getAllUsers).post(addNewUser);
+
+app
+  .route('/api/v1/users/:id')
+  .get(getSpecificUser)
+  .patch(patchSpecificUser)
+  .delete(deleteSpecificUser);
+//---------------------------------------------------------------------------
 const port = 3000;
 app.listen(port, () => {
   console.log(`App listening on ${port}`);
