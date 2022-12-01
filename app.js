@@ -9,6 +9,11 @@ const tours = JSON.parse(
 const app = express();
 
 app.use(express.json()); //middleware to translate data in the request body
+
+app.use((req, res, next) => {
+  req.requestTime = new Date().toISOString();
+  next();
+});
 //---------------------------------------------------------------------------
 // app.get('/', (req, res) => {
 //   // res.status(200).send(`Hello from the server side , it"s nice to meat you!"`);   //send used to send string
@@ -25,6 +30,7 @@ app.use(express.json()); //middleware to translate data in the request body
 const getAllTours = (req, res) => {
   res.status(200).json({
     status: 'success',
+    requestTime: req.requestTime,
     results: tours.length,
     data: {
       tours: tours,
@@ -38,11 +44,13 @@ const getSpecificTour = (req, res) => {
   if (!tour) {
     res.status(404).json({
       status: 'failure',
+      requestTime: req.requestTime,
       message: 'Invalid ID',
     });
   }
   res.status(200).json({
     status: 'success',
+    requestTime: req.requestTime,
     tour: { tour: tour },
   });
 };
@@ -59,6 +67,7 @@ const postNewTour = (req, res) => {
     (error) => {
       res.status(201).json({
         status: 'success',
+        postTime: req.requestTime,
         results: tours.length,
         data: { tours: tours },
       });
